@@ -1454,6 +1454,43 @@ class DTDFormat(FileFormat):
         return store
 
 
+from weblate.trans.flatxml import FlatXMLFile
+
+class XMLUnit(FileUnit):
+    def get_locations(self):
+        return ''
+
+    def get_context(self):
+        if self.template is not None:
+            return self.template.getid()
+        return self.unit.getid()
+
+    def get_source(self):
+        if self.template is not None:
+            return get_string(self.template.target)
+        return self.mainunit.getid()
+
+class StringsXMLFile(weblate.trans.flatxml.FlatXMLFile):
+	def __init__(self, inputfile=None, **kwargs):
+		super(StringsXMLFile, self).__init__(
+				inputfile=inputfile,
+				root_name="strings",
+				value_name="str",
+				key_name="name",
+				indent_chars="    ",
+				**kwargs)
+
+@register_fileformat
+class XMLFormat(FileFormat):
+    name = _('Flat XML translation file')
+    format_id = 'flatxml'
+    loader = StringsXMLFile
+    monolingual = True
+    autoload = ('.xml',)
+    unit_class = XMLUnit
+    new_translation = '<strings/>'
+
+
 FILE_FORMAT_CHOICES = [
     (fmt, FILE_FORMATS[fmt].name) for fmt in sorted(FILE_FORMATS)
 ]
